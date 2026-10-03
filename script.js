@@ -117,6 +117,9 @@ let state = freshState();
 let selected = new Set(), baked=false, baking=false, serving=false, remaining=75, timer=null, ovenTimer=null, ovenTicks=0, order=null;
 let resetAll = false;
 let paused = false;
+let startScreenOpen = true;
+let gameLoaded = false;
+let selectedStartSlot = saves.active;
 let soundEnabled = false;
 let audioContext = null;
 let pendingDelete = null;
@@ -124,12 +127,49 @@ let gameView = 'kitchen';
 let crewProgress = 0;
 const money = n => `$${n.toFixed(2)}`;
 function save(){
+  if(!gameLoaded)return;
   const pizza=kitchenSnapshot();state.kitchens[state.currentStore]=pizza;
   saves.slots[saves.active] = {name:'Corner Slice',saveName:saveFileName(saves.slots[saves.active],saves.active),state:JSON.parse(JSON.stringify(state)),pizza,updated:Date.now()};
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saves));storageAvailable=true;}catch{storageAvailable=false;}
   $('save-status').textContent=storageAvailable?'AUTOSAVE ON':'SAVES LAST FOR THIS VISIT';
   $('active-save').textContent=saveFileName(saves.slots[saves.active],saves.active);
   $('active-slot-label').textContent=`SAVE ${saves.active+1} / 3`;
+}
+function renderStartMenu(){
+  $('start-save-slots').replaceChildren(...saves.slots.map((slot,index)=>{
+    const button=document.createElement('button');button.className='start-save-card';
+    button.setAttribute('aria-pressed',String(index===selectedStartSlot));
+    const number=document.createElement('span');number.className='start-slot-number';number.textContent=String(index+1).padStart(2,'0');
+    const details=document.createElement('span');details.className='start-slot-details';
+    const name=document.createElement('strong');name.textContent=saveFileName(slot,index);
+    const summary=document.createElement('small');summary.textContent=slot?`Day ${slot.state.day} · ${money(slot.state.earnings-slot.state.spent)} cash · ${slot.state.sold} pizzas`:'Empty slot · A new empire starts here';
+    details.append(name,summary);
+    const marker=document.createElement('span');marker.className='start-slot-marker';marker.textContent=index===selectedStartSlot?'✓':'+';marker.setAttribute('aria-hidden','true');
+    button.append(number,details,marker);
+    button.addEventListener('click',()=>{selectedStartSlot=index;renderStartMenu();$('start-save-slots').children[index].focus();});
+    return button;
+  }));
+  const slot=saves.slots[selectedStartSlot];
+  $('start-selection').textContent=slot?`Continue ${saveFileName(slot,selectedStartSlot)} · Day ${slot.state.day}`:`Start a new game in Save ${selectedStartSlot+1}`;
+  $('start-button').textContent=slot?'Continue game →':'Start game →';
+  $('start-storage-note').textContent=storageAvailable?'Progress saves in this browser':'Saves only last for this visit';
+  $('start-sound-button').textContent=soundEnabled?'♪ Sound on':'♪ Sound off';
+  $('start-sound-button').setAttribute('aria-pressed',String(soundEnabled));
+}
+function startGame(){
+  if(!startScreenOpen)return;
+  if(gameLoaded)save();
+  const needsLoad=!gameLoaded||saves.active!==selectedStartSlot;
+  if(needsLoad){clearInterval(timer);clearInterval(ovenTimer);timer=null;ovenTimer=null;saves.active=selectedStartSlot;gameLoaded=true;loadSlot();}
+  startScreenOpen=false;
+  $('start-screen').hidden=true;$('game-shell').hidden=false;
+  renderPause();$('pause-button').focus();
+}
+function showStartMenu(){
+  if(!gameLoaded||startScreenOpen)return;
+  save();startScreenOpen=true;selectedStartSlot=saves.active;
+  $('game-shell').hidden=true;$('start-screen').hidden=false;
+  $('toast').hidden=true;renderStartMenu();$('start-title').focus();
 }
 function saveMenu(){
   $('save-slots').replaceChildren(...saves.slots.map((slot,index)=>{
@@ -347,7 +387,7 @@ function finishOrder(expired=false,automated=false){
 let pendingImport=null;
 let toastTimeout=null;
 function shopName(){return 'Corner Slice';}
-function isPaused(){return paused || document.hidden || !!document.querySelector('dialog[open]');}
+function isPaused(){return startScreenOpen || paused || document.hidden || !!document.querySelector('dialog[open]');}
 function openDialog(id){$(id).showModal();controls();patience();}
 function renderPause(){
   $('pause-overlay').hidden=!paused;
@@ -695,6 +735,10 @@ $('automation-button').addEventListener('click',()=>{
   if(!staffAt(state.currentStore)||shiftClosed())return;state.autoEnabled[state.currentStore]=!state.autoEnabled[state.currentStore];crewProgress=0;renderAutomation();save();
 });
 $('help-button').addEventListener('click',()=>openDialog('help-dialog'));
+$('start-help-button').addEventListener('click',()=>openDialog('help-dialog'));
+$('start-button').addEventListener('click',startGame);
+$('main-menu-button').addEventListener('click',showStartMenu);
+$('start-sound-button').addEventListener('click',()=>{$('sound-button').click();renderStartMenu();});
 $('saves-button').addEventListener('click',()=>{save();saveMenu();openDialog('saves-dialog');});
 $('reset-button').addEventListener('click',()=>{
   resetAll=false;$('reset-title').textContent='Restart this save?';$('reset-description').textContent=`This clears ${shopName()} and its whole city, including stores and crew. Other saves stay saved.`;$('confirm-reset').textContent='Restart save';openDialog('reset-dialog');
@@ -738,11 +782,12 @@ $('confirm-import').addEventListener('click',()=>{
 $('import-dialog').addEventListener('close',()=>{pendingImport=null;});
 document.addEventListener('visibilitychange',()=>{renderPause();save();});
 document.addEventListener('keydown',event=>{
+  if(startScreenOpen)return;
   if(event.repeat||event.ctrlKey||event.metaKey||event.altKey||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(event.target.tagName)||document.querySelector('dialog[open]')||gameView!=='kitchen')return;
   const action={b:'bake-button',s:'serve-button',r:'clear-button',p:'pause-button'}[event.key.toLowerCase()];
   if(action&&!$(action).disabled){event.preventDefault();$(action).click();}
 });
 window.addEventListener('pagehide',save);
-loadSlot();
+renderStartMenu();
 setInterval(networkTick,1000);
 setInterval(clockTick,1000 / MINUTES_PER_SECOND);

@@ -2,7 +2,32 @@
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#172530"><meta name="description" content="Slice City: a pizza tycoon game. Cook pizzas, build a city of shops, and manage your crew."><title>Slice City — Pizza Tycoon</title><link rel="stylesheet" href="style.css"></head>
 <body>
-<div class="game-shell">
+<noscript><p style="padding:20px;text-align:center">Enable JavaScript in your browser to play Slice City.</p></noscript>
+<main id="start-screen" class="start-screen" aria-labelledby="start-title">
+  <header class="start-header"><div class="game-brand"><span aria-hidden="true">🍕</span><div><strong>Slice City</strong><small>Pizza tycoon</small></div></div><span class="start-status"><span class="live-dot"></span> YOUR NEXT CHAPTER</span></header>
+  <div class="start-layout">
+    <section class="start-intro">
+      <span class="start-eyebrow">ONE COUNTER. A WHOLE CITY OF POSSIBILITIES.</span>
+      <h1 id="start-title" tabindex="-1">Small shop.<br>Big <em>slice</em> dreams.</h1>
+      <p>Fire up the oven, find your regulars, and turn a little corner shop into a pizza empire.</p>
+      <div class="start-shop" aria-hidden="true">
+        <div class="start-shop-stars">✦ <span>MADE FRESH. BUILT BY YOU.</span> ✦</div>
+        <div class="start-shop-sign">CORNER SLICE <span>🍕</span></div><div class="start-awning"></div>
+        <div class="start-shop-front"><div class="start-window"><span>🍕</span><small>HOT & FRESH</small></div><div class="start-shop-door"><span>OPEN</span><i></i></div><div class="start-window"><span>🌿</span><small>GOOD THINGS GROW HERE</small></div></div>
+        <div class="start-shop-step"></div><div class="start-shop-caption">Your empire starts right here.</div>
+      </div>
+      <div class="start-features"><span>6 shops to own</span><span>18 crew to hire</span><span>Endless pizza possibilities</span></div>
+    </section>
+    <section class="start-menu game-panel" aria-labelledby="start-save-title">
+      <div class="start-menu-heading"><span class="start-eyebrow">LET’S GET COOKING</span><h2 id="start-save-title">Choose your story</h2><p>Pick a save to continue, or make a fresh start.</p></div>
+      <div id="start-save-slots" class="start-save-slots" role="group" aria-label="Choose a save"></div>
+      <div class="start-menu-actions"><p id="start-selection" class="start-selection" role="status"></p><button id="start-button" class="primary-button start-play">Start game <span aria-hidden="true">→</span></button><button id="start-help-button" class="outline-button start-help">? How to play</button></div>
+      <div class="start-menu-foot"><button id="start-sound-button" class="text-button" aria-pressed="false">♪ Sound off</button><span id="start-storage-note">Progress saves in this browser</span></div>
+    </section>
+  </div>
+  <footer class="start-footer"><span>A little dough. A lot of ambition.</span><span>Select a save, then press Start.</span></footer>
+</main>
+<div id="game-shell" class="game-shell" hidden>
   <header class="game-hud">
     <div class="game-brand"><span>🍕</span><div><strong>Slice City</strong><small>Pizza tycoon</small></div></div>
     <div class="hud-location"><span class="live-dot"></span><div><small>NOW PLAYING</small><strong id="current-location">Corner Slice</strong></div></div>
@@ -71,7 +96,7 @@
       <section id="journal-view" class="journal-view game-panel" aria-label="Campaign progress" hidden><div class="view-title"><div><span class="view-kicker">EVERY SLICE COUNTS</span><h1>Quest log</h1><p>Build your empire, one pizza at a time.</p></div></div><div class="dashboard"><div><span>LIFETIME REVENUE</span><strong id="earnings">$0.00</strong></div><div><span>PIZZAS SOLD</span><strong id="sold">0</strong></div><div><span>REPUTATION</span><strong id="reputation">5.0</strong></div></div><div class="progress-stats"><div><span>PERFECT PIZZAS</span><strong id="journal-perfect">0</strong></div><div><span>BEST STREAK</span><strong id="journal-streak">0</strong></div><div><span>CHALLENGES WON</span><strong id="journal-challenges">0</strong></div></div><div class="quest-objective"><span>🎯</span><div><strong>Build a city-wide pizza empire</strong><p>Own all six shops and fully staff them to win. You can keep playing after conquering the city.</p><small id="empire-progress">1 / 6 shops · 0 / 18 assigned crew</small><div class="empire-track"><i id="empire-track-fill"></i></div></div></div><h2 class="journal-heading">Recent activity</h2><p id="history-empty" class="screen-note">Make your first pizza to start your story.</p><ul id="recent-sales"></ul></section>
     </main>
   </div>
-  <footer class="game-footer"><div><span class="live-dot"></span><strong>Slice City</strong></div><div><button id="sound-button" class="text-button" aria-pressed="false">♪ Sound off</button><button id="help-button" class="text-button">? Help</button><button id="reset-button" class="text-button">↻ Restart save</button></div></footer>
+  <footer class="game-footer"><div><span class="live-dot"></span><strong>Slice City</strong></div><div><button id="main-menu-button" class="text-button">⌂ Main menu</button><button id="sound-button" class="text-button" aria-pressed="false">♪ Sound off</button><button id="help-button" class="text-button">? Help</button><button id="reset-button" class="text-button">↻ Restart save</button></div></footer>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <dialog id="help-dialog"><button class="dialog-close" data-close="help-dialog" aria-label="Close instructions">×</button><div class="eyebrow">WELCOME TO THE COUNTER</div><h2>How to play</h2><ol><li>Read the order and tap ingredients to build a pizza.</li><li>Bake, then serve to get paid. Remake anytime before serving.</li><li>Accurate orders earn tips. Perfect streaks earn extra cash.</li><li>Serve unlimited customers between 8 AM and 6 PM. Five game minutes pass every two seconds. A full day lasts four real minutes.</li><li>Hire workers and let them prepare, bake, and sell pizzas on autopilot, or take control to cook yourself.</li><li>Open the City Map to buy and visit shops. Each has its own kitchen and equipment.</li><li>Hire named workers and assign them on the Crew screen. They make and sell pizzas at every staffed shop from 8 AM to 6 PM.</li><li>From day 6, each day has a new special and a cash-bonus challenge.</li></ol><p>The timer starts with your first ingredient: 75 seconds, gradually reducing to 60. Remaking keeps the timer running. Map and crew screens keep the day running. Pause whenever you need; popup menus and hidden browser tabs freeze the game.</p><button class="primary-button" data-close="help-dialog">Let’s cook →</button></dialog>
