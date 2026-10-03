@@ -139,12 +139,13 @@ function renderStartMenu(){
   $('start-save-slots').replaceChildren(...saves.slots.map((slot,index)=>{
     const button=document.createElement('button');button.className='start-save-card';
     button.setAttribute('aria-pressed',String(index===selectedStartSlot));
-    const number=document.createElement('span');number.className='start-slot-number';number.textContent=String(index+1).padStart(2,'0');
+    const number=document.createElement('span');number.className='start-slot-number';number.textContent=slot?'🍕':'🏪';number.setAttribute('aria-hidden','true');
     const details=document.createElement('span');details.className='start-slot-details';
-    const name=document.createElement('strong');name.textContent=saveFileName(slot,index);
+    const label=document.createElement('span');label.className='start-slot-label';label.textContent=`SAVE ${String(index+1).padStart(2,'0')} · ${slot?'CONTINUE':'NEW GAME'}`;
+    const name=document.createElement('strong');name.textContent=slot?saveFileName(slot,index):'A fresh start';
     const summary=document.createElement('small');summary.textContent=slot?`Day ${slot.state.day} · ${money(slot.state.earnings-slot.state.spent)} cash · ${slot.state.sold} pizzas`:'Empty slot · A new empire starts here';
-    details.append(name,summary);
-    const marker=document.createElement('span');marker.className='start-slot-marker';marker.textContent=index===selectedStartSlot?'✓':'+';marker.setAttribute('aria-hidden','true');
+    details.append(label,name,summary);
+    const marker=document.createElement('span');marker.className='start-slot-marker';marker.textContent=index===selectedStartSlot?'▶':'+';marker.setAttribute('aria-hidden','true');
     button.append(number,details,marker);
     button.addEventListener('click',()=>{selectedStartSlot=index;renderStartMenu();$('start-save-slots').children[index].focus();});
     return button;
